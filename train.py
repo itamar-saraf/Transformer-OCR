@@ -110,13 +110,15 @@ def train():
     batch_size = 64
     train_dataloader = torch.utils.data.DataLoader(ListDataset(['dataset/train.txt']), batch_size=batch_size,
                                                    shuffle=True, num_workers=0)
-    val_dataloader = torch.utils.data.DataLoader(ListDataset('your-test-lines'), batch_size=batch_size, shuffle=False,
+    val_dataloader = torch.utils.data.DataLoader(ListDataset('dataset/val.txt'), batch_size=batch_size, shuffle=False,
                                                  num_workers=0)
     model = make_model(len(char2token))
-    model.load_state_dict(torch.load('your-pretrain-model-path'))
+    # model.load_state_dict(torch.load('your-pretrain-model-path'))
     model.cuda()
+    # model.cpu()
     criterion = LabelSmoothing(size=len(char2token), padding_idx=0, smoothing=0.1)
     criterion.cuda()
+    # criterion.cpu()
     model_opt = NoamOpt(model.tgt_embed[0].d_model, 1, 2000,
                         torch.optim.Adam(model.parameters(), lr=0, betas=(0.9, 0.98), eps=1e-9))
     for epoch in range(10000):

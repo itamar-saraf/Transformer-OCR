@@ -10,8 +10,10 @@ import sys, os
 model = make_model(len(char2token))
 model.load_state_dict(torch.load('your-model-path'))
 model.cuda()
+# model.cpu()
 model.eval()
 src_mask=Variable(torch.from_numpy(np.ones([1, 1, 36], dtype=np.bool)).cuda())
+# src_mask=Variable(torch.from_numpy(np.ones([1, 1, 36], dtype=np.bool)).cpu())
 SIZE=96
 
 def greedy_decode(src, max_len=36, start_symbol=1):

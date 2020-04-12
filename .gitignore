@@ -1,2 +1,11 @@
 *.txt
+*.pyc
+
+
 venv
+__pycache__
+.idea
+
+
+LICENSE
+README.md
