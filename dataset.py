@@ -30,15 +30,18 @@ def illegal(label):
 
 class ListDataset(Dataset):
     def __init__(self, fname):
+        self.NUM_OF_SAMPLES = 4500000
         self.lines = []
         if not isinstance(fname, list):
             fname = [fname]
         for f in fname:
             lines = open(f).readlines()
-            for i in lines:
-                label = illegal(i.strip('\n').split('\t')[1])
+            for i, line in enumerate(lines):
+                if i >= self.NUM_OF_SAMPLES:
+                    break
+                label = illegal(line.strip('\n').split('\t')[1])
                 if not label:
-                    self.lines.append(i)
+                    self.lines.append(line)
 
     def __len__(self):
         return len(self.lines)
