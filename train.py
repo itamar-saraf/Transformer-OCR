@@ -7,6 +7,8 @@ from dataset import char2token
 from dataset import Batch
 from model import make_model
 import os
+import argparse
+
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
@@ -91,7 +93,7 @@ def run_epoch(dataloader, model, loss_compute):
     total_loss = 0
     tokens = 0
     for i, (imgs, labels_y, labels) in enumerate(dataloader):
-        batch = Batch(imgs, labels_y, labels)
+        batch = Batch(imgs, labels_y, labels, device=args.device)
         out = model(batch.imgs, batch.trg, batch.src_mask, batch.trg_mask)
         loss = loss_compute(out, batch.trg_y, batch.ntokens)
         total_loss += loss
@@ -114,23 +116,30 @@ def train():
                                                  num_workers=0)
     model = make_model(len(char2token))
     # model.load_state_dict(torch.load('your-pretrain-model-path'))
-    model.cuda()
-    # model.cpu()
+    model.to(device=args.device)
     criterion = LabelSmoothing(size=len(char2token), padding_idx=0, smoothing=0.1)
-    criterion.cuda()
-    # criterion.cpu()
+    criterion.to(device=args.device)
     model_opt = NoamOpt(model.tgt_embed[0].d_model, 1, 2000,
                         torch.optim.Adam(model.parameters(), lr=0, betas=(0.9, 0.98), eps=1e-9))
     for epoch in range(10000):
         model.train()
-        run_epoch(train_dataloader, model,
+        train_loss = run_epoch(train_dataloader, model,
                   SimpleLossCompute(model.generator, criterion, model_opt))
+        print("train_loss", train_loss)
         model.eval()
-        test_loss = run_epoch(val_dataloader, model,
+        val_loss = run_epoch(val_dataloader, model,
                               SimpleLossCompute(model.generator, criterion, None))
-        print("test_loss", test_loss)
-        torch.save(model.state_dict(), 'checkpoint/%08d_%f.pth' % (epoch, test_loss))
+        print("val_loss", val_loss)
+        torch.save(model.state_dict(), 'checkpoint/%08d_%f.pth' % (epoch, val_loss))
 
 
 if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='PyTorch Example')
+    args = parser.parse_args()
+    args.device = None
+    if torch.cuda.is_available():
+        args.device = torch.device('cuda')
+    else:
+        args.device = torch.device('cpu')
+
     train()

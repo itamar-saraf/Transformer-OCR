@@ -1,6 +1,7 @@
 *.txt
 *.pyc
-
+*.pth
+*.xml
 
 venv
 __pycache__

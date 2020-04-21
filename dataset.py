@@ -4,6 +4,7 @@ from torch.utils.data import Dataset
 from torch.autograd import Variable
 import os
 import cv2
+from matplotlib.pyplot import imshow, show
 import numpy as np
 from torchvision import datasets, models, transforms
 
@@ -49,6 +50,7 @@ class ListDataset(Dataset):
         line = self.lines[index]
         img_path, label_y_str = line.strip('\n').split('\t')
         img = cv2.imread(img_path) / 255.
+        img = cv2.resize(img, dsize=(96, 96), interpolation=cv2.INTER_CUBIC)
         # Channels-first
         img = np.transpose(img, (2, 0, 1))
         # As pytorch tensor
@@ -84,33 +86,27 @@ def make_std_mask(tgt, pad):
 class Batch:
     "Object for holding a batch of data with mask during training."
 
-    def __init__(self, imgs, trg_y, trg, pad=0):
-        self.imgs = Variable(imgs.cuda(), requires_grad=False)
-        self.src_mask = Variable(torch.from_numpy(np.ones([imgs.size(0), 1, 36], dtype=np.bool)).cuda())
-        # for env without cuda
-        # self.imgs = Variable(imgs.cpu(), requires_grad=False)
-        # self.src_mask = Variable(torch.from_numpy(np.ones([imgs.size(0), 1, 36], dtype=np.bool)).cpu())
+    def __init__(self, imgs, trg_y, trg, device, pad=0):
+        self.device = device
+        self.imgs = Variable(imgs.to(self.device), requires_grad=False)
+        self.src_mask = Variable(torch.from_numpy(np.ones([imgs.size(0), 1, 36], dtype=np.bool)).to(self.device))
 
         if trg is not None:
-            self.trg = Variable(trg.cuda(), requires_grad=False)
-            self.trg_y = Variable(trg_y.cuda(), requires_grad=False)
-            # for env without cuda
-            # self.trg = Variable(trg.cpu(), requires_grad=False)
-            # self.trg_y = Variable(trg_y.cpu(), requires_grad=False)
+            self.trg = Variable(trg.to(self.device), requires_grad=False)
+            self.trg_y = Variable(trg_y.to(self.device), requires_grad=False)
             self.trg_mask = \
-                self.make_std_mask(self.trg, pad)
+                self.make_std_mask(self.trg, pad, self.device)
             self.ntokens = (self.trg_y != pad).data.sum()
 
     @staticmethod
-    def make_std_mask(tgt, pad):
+    def make_std_mask(tgt, pad, device):
         "Create a mask to hide padding and future words."
         tgt_mask = (tgt != pad).unsqueeze(-2)
         tgt_mask = tgt_mask & Variable(
             subsequent_mask(tgt.size(-1)).type_as(tgt_mask.data))
-        return Variable(tgt_mask.cuda(), requires_grad=False)
+        return Variable(tgt_mask.to(device), requires_grad=False)
         #  # for env without cuda
         # return Variable(tgt_mask.cpu(), requires_grad=False)
-
 
 
 class FeatureExtractor(nn.Module):

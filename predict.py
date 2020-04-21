@@ -12,24 +12,25 @@ model.load_state_dict(torch.load('your-model-path'))
 model.cuda()
 # model.cpu()
 model.eval()
-src_mask=Variable(torch.from_numpy(np.ones([1, 1, 36], dtype=np.bool)).cuda())
+src_mask = Variable(torch.from_numpy(np.ones([1, 1, 36], dtype=np.bool)).cuda())
 # src_mask=Variable(torch.from_numpy(np.ones([1, 1, 36], dtype=np.bool)).cpu())
-SIZE=96
+SIZE = 96
+
 
 def greedy_decode(src, max_len=36, start_symbol=1):
     global model
     global src_mask
     memory = model.encode(src, src_mask)
     ys = torch.ones(1, 1).fill_(start_symbol).long().cuda()
-    for i in range(max_len-1):
-        out = model.decode(memory, src_mask, 
-                           Variable(ys), 
+    for i in range(max_len - 1):
+        out = model.decode(memory, src_mask,
+                           Variable(ys),
                            Variable(subsequent_mask(ys.size(1))
                                     .long().cuda()))
         prob = model.generator(out[:, -1])
-        _, next_word = torch.max(prob, dim = 1)
+        _, next_word = torch.max(prob, dim=1)
         next_word = next_word.data[0]
-        ys = torch.cat([ys, 
+        ys = torch.cat([ys,
                         torch.ones(1, 1).long().cuda().fill_(next_word)], dim=1)
         if token2char[next_word.item()] == '>':
             break
@@ -38,29 +39,31 @@ def greedy_decode(src, max_len=36, start_symbol=1):
     out = "".join(out[1:-1])
     return out
 
+
 def resize(img):
     h, w, c = img.shape
     if w > h:
-        nw, nh = SIZE, int(h * SIZE/w)
-        if nh < 10 : nh = 10
-        #print(h, w, nh, nw)
+        nw, nh = SIZE, int(h * SIZE / w)
+        if nh < 10: nh = 10
+        # print(h, w, nh, nw)
         img = cv2.resize(img, (nw, nh))
-        a1 = int((SIZE-nh)/2)
-        a2= SIZE-nh-a1
+        a1 = int((SIZE - nh) / 2)
+        a2 = SIZE - nh - a1
         pad1 = np.zeros((a1, SIZE, c), dtype=np.uint8)
         pad2 = np.zeros((a2, SIZE, c), dtype=np.uint8)
         img = np.concatenate((pad1, img, pad2), axis=0)
     else:
-        nw, nh = int(w * SIZE/h), SIZE
-        if nw < 10 : nw = 10
-        #print(h, w, nh, nw)
+        nw, nh = int(w * SIZE / h), SIZE
+        if nw < 10: nw = 10
+        # print(h, w, nh, nw)
         img = cv2.resize(img, (nw, nh))
-        a1 = int((SIZE-nw)/2)
-        a2= SIZE-nw-a1
+        a1 = int((SIZE - nw) / 2)
+        a2 = SIZE - nw - a1
         pad1 = np.zeros((SIZE, a1, c), dtype=np.uint8)
         pad2 = np.zeros((SIZE, a2, c), dtype=np.uint8)
         img = np.concatenate((pad1, img, pad2), axis=1)
     return img
+
 
 def do_folder(root):
     hit = 0
@@ -75,25 +78,9 @@ def do_folder(root):
         pred = greedy_decode(img)
         if pred != label:
             hit += 1
-            print('imp:', imp, 'label:', label, 'pred:', pred, hit, all, hit/all)
-    print(hit, all, hit/all)
+            print('imp:', imp, 'label:', label, 'pred:', pred, hit, all, hit / all)
+    print(hit, all, hit / all)
 
 
 if __name__ == '__main__':
     do_folder('your-test-lines')
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
