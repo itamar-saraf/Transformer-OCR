@@ -9,7 +9,6 @@ from model import make_model
 import os
 import argparse
 
-
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 
@@ -109,7 +108,8 @@ def run_epoch(dataloader, model, loss_compute):
 
 
 def train():
-    batch_size = 64
+    batch_size = 256
+
     train_dataloader = torch.utils.data.DataLoader(ListDataset(['dataset/train.txt']), batch_size=batch_size,
                                                    shuffle=True, num_workers=0)
     val_dataloader = torch.utils.data.DataLoader(ListDataset('dataset/val.txt'), batch_size=batch_size, shuffle=False,
@@ -124,11 +124,11 @@ def train():
     for epoch in range(10000):
         model.train()
         train_loss = run_epoch(train_dataloader, model,
-                  SimpleLossCompute(model.generator, criterion, model_opt))
+                               SimpleLossCompute(model.generator, criterion, model_opt))
         print("train_loss", train_loss)
         model.eval()
         val_loss = run_epoch(val_dataloader, model,
-                              SimpleLossCompute(model.generator, criterion, None))
+                             SimpleLossCompute(model.generator, criterion, None))
         print("val_loss", val_loss)
         torch.save(model.state_dict(), 'checkpoint/%08d_%f.pth' % (epoch, val_loss))
 

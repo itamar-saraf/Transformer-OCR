@@ -49,7 +49,14 @@ class ListDataset(Dataset):
         '''
         line = self.lines[index]
         img_path, label_y_str = line.strip('\n').split('\t')
-        img = cv2.imread(img_path) / 255.
+        img = None
+        while img is None:
+            img = cv2.imread(img_path)
+            if img is None:
+                index = np.random.randint(self.__len__())
+                line = self.lines[index]
+                img_path, label_y_str = line.strip('\n').split('\t')
+        img = img / 255.
         img = cv2.resize(img, dsize=(96, 96), interpolation=cv2.INTER_CUBIC)
         # Channels-first
         img = np.transpose(img, (2, 0, 1))
