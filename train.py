@@ -122,7 +122,7 @@ def run_epoch(dataloader, model, loss_compute, params):
 
 
 def train(params):
-    batch_size = 1
+    batch_size = 64
 
     train_dataloader = torch.utils.data.DataLoader(ListDataset(['dataset/train.txt']), batch_size=batch_size,
                                                    shuffle=True, num_workers=0)
