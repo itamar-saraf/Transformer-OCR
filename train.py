@@ -93,16 +93,7 @@ def run_epoch(dataloader, model, loss_compute, params):
     total_loss = 0
     tokens = 0
 
-    if params['pre']:
-        total_tokens = params['total_tokens']
-        total_loss = params['total_loss']
-
     for i, (imgs, labels_y, labels) in enumerate(dataloader):
-        if params['pre']:
-            if i < params['iter']:
-                continue
-            if i == params['iter']:
-                params['pre'] = False
         batch = Batch(imgs, labels_y, labels, device=params['device'])
         out = model(batch.imgs, batch.trg, batch.src_mask, batch.trg_mask)
         loss = loss_compute(out, batch.trg_y, batch.ntokens)
@@ -113,9 +104,6 @@ def run_epoch(dataloader, model, loss_compute, params):
             elapsed = time.time() - start
             print("Epoch Step: %d Loss: %f Tokens per Sec: %f" %
                   (i, loss / batch.ntokens, tokens / elapsed))
-            if i % 1000 == 1:
-                torch.save(model.state_dict(),
-                           'checkpoint/middle-of-run/%d_%d_%f_%f.pth' % (params['epoch'], i, total_loss, total_tokens))
             start = time.time()
             tokens = 0
     return total_loss / total_tokens
@@ -126,16 +114,10 @@ def train(params):
 
     train_dataloader = torch.utils.data.DataLoader(ListDataset(['dataset/train.txt']), batch_size=batch_size,
                                                    shuffle=True, num_workers=0)
-    val_dataloader = torch.utils.data.DataLoader(ListDataset('dataset/val.txt'), batch_size=batch_size, shuffle=False,
+    val_dataloader = torch.utils.data.DataLoader(ListDataset('dataset/validation.txt'), batch_size=batch_size,
+                                                 shuffle=False,
                                                  num_workers=0)
     model = make_model(len(char2token))
-
-    if params['pre']:
-        model.load_state_dict(torch.load('checkpoint/middle-of-run/0_1_66.436836_16.000000.pth'))
-        params['epoch'] = 0
-        params['iter'] = 1
-        params['total_loss'] = 66.436836
-        params['total_tokens'] = 16.000000
 
     model.to(device=params['device'])
     criterion = LabelSmoothing(size=len(char2token), padding_idx=0, smoothing=0.1)
@@ -153,12 +135,6 @@ def train(params):
                              SimpleLossCompute(model.generator, criterion, None), params)
         print("val_loss", val_loss)
         torch.save(model.state_dict(), 'checkpoint/%08d_%f.pth' % (epoch, val_loss))
-        fileList = glob.glob('checkpoint/middle-of-run/*.pth')
-        for filePath in fileList:
-            try:
-                os.remove(filePath)
-            except:
-                print("Error while deleting file : ", filePath)
 
 
 if __name__ == '__main__':
@@ -167,7 +143,5 @@ if __name__ == '__main__':
         params['device'] = torch.device('cuda')
     else:
         params['device'] = torch.device('cpu')
-    params['pre'] = False
-    if len(sys.argv) > 1:
-        params['pre'] = True
+
     train(params)
