@@ -28,7 +28,13 @@ I recommend to look in predict script to understand the dir structure,
     'IC15': 'eval/IC15/images'
     
     
-yoy also need to create checkpoint/ directory, after each epoch the script will save a model. 
+
+you also need to create checkpoint/ directory, after each epoch the script will save a model. 
+
+you should notice that the requirements is for cpu, you need to change it.
+
+# Author note
+We realized that the code of computing loss is problemtic, which is directly borrowed from http://nlp.seas.harvard.edu/2018/04/03/attention.html#loss-computation. We are revising the code and conducting new experiments. To aovid misleading others, we have withdrawed the arXiv paper. We will decide whether submit a new paper to arXiv according to the new expermen
 
 # Scene Text Recognition via Transformer
 Implementation of Transformer OCR  as described at [Scene Text Recognition via Transformer](https://arxiv.org/abs/2003.08077).
