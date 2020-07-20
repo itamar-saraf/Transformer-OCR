@@ -2,10 +2,10 @@ import torch
 from torch.autograd import Variable
 import numpy as np
 from model import make_model
-from dataset import vocab, char2token, token2char
+from dataset import char2token, token2char
 from dataset import subsequent_mask
 import cv2
-import sys, os
+import os
 
 if torch.cuda.is_available():
     device = torch.device('cuda')
@@ -104,6 +104,4 @@ def do_folder(root):
 
 
 if __name__ == '__main__':
-
     do_folder(test_gt['IC15'])
-

@@ -7,8 +7,6 @@ from dataset import char2token
 from dataset import Batch
 from model import make_model
 import os
-import sys
-import glob
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 

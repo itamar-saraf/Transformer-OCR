@@ -102,7 +102,7 @@ class Vec2(Vec, ComparableMixin):
 
     @property
     def length(self):
-        return math.sqrt(self.x**2 + self.y**2)
+        return math.sqrt(self.x ** 2 + self.y ** 2)
 
     def elementwise_max(self, other):
         return Vec2(
@@ -197,7 +197,7 @@ BBoxBase = namedtuple("BBox", ["top_left", "top_right", "bottom_right", "bottom_
 
 class BBox(BBoxBase):
 
-    def __new__(cls, *args,):
+    def __new__(cls, *args, ):
         int_args = [arg.to_int() for arg in args]
         return super().__new__(cls, *int_args)
 
@@ -372,9 +372,9 @@ class BBox(BBoxBase):
 
         image_size = Vec2(*image_size)
         x_prime = (
-            list(self.top_left / image_size * 2 - 1) +
-            list(self.top_right / image_size * 2 - 1) +
-            list(self.bottom_left / image_size * 2 - 1)
+                list(self.top_left / image_size * 2 - 1) +
+                list(self.top_right / image_size * 2 - 1) +
+                list(self.bottom_left / image_size * 2 - 1)
         )
 
         a = []

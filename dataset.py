@@ -2,11 +2,8 @@ import torch
 import torch.nn as nn
 from torch.utils.data import Dataset
 from torch.autograd import Variable
-import os
 import cv2
-from matplotlib.pyplot import imshow, show
 import numpy as np
-from torchvision import datasets, models, transforms
 
 label_len = 36
 vocab = "<,.+:-?$ 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ>"
@@ -115,8 +112,6 @@ class Batch:
         tgt_mask = tgt_mask & Variable(
             subsequent_mask(tgt.size(-1)).type_as(tgt_mask.data))
         return Variable(tgt_mask.to(device), requires_grad=False)
-        #  # for env without cuda
-        # return Variable(tgt_mask.cpu(), requires_grad=False)
 
 
 class FeatureExtractor(nn.Module):

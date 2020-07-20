@@ -2,9 +2,9 @@ import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import math, copy
-from torch.autograd import Variable
-from torchvision import datasets, models, transforms
+import math
+import copy
+from torchvision import models
 
 
 class EncoderDecoder(nn.Module):
