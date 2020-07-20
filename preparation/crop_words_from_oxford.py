@@ -75,7 +75,7 @@ def main(args):
 
                     with open(os.path.join(get_path('saved_images', args) + args.destination + '/' + "list.txt"),
                               "a") as f:
-                        path = './dataset/' + destination_file_name
+                        path = './data/dataset/' + destination_file_name
 
                         f.write(path + '\t' + words[i] + '\n')
 

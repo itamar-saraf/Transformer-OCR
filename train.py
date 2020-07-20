@@ -110,9 +110,9 @@ def run_epoch(dataloader, model, loss_compute, params):
 def train(params):
     batch_size = 64
 
-    train_dataloader = torch.utils.data.DataLoader(ListDataset(['dataset/train.txt']), batch_size=batch_size,
+    train_dataloader = torch.utils.data.DataLoader(ListDataset(['data/dataset/train.txt']), batch_size=batch_size,
                                                    shuffle=True, num_workers=0)
-    val_dataloader = torch.utils.data.DataLoader(ListDataset('dataset/validation.txt'), batch_size=batch_size,
+    val_dataloader = torch.utils.data.DataLoader(ListDataset('data/dataset/validation.txt'), batch_size=batch_size,
                                                  shuffle=False,
                                                  num_workers=0)
     model = make_model(len(char2token))
